@@ -1,0 +1,101 @@
+version: "3.7"
+services:
+
+  # Nginx Service
+  nginx:
+    image: linuxserver/nginx
+    ports:
+      - 80:80
+      - 8443:443
+    volumes:
+      - /home/project/website/config:/config
+    environment:
+      - TZ=Europe/London
+        #- URL=s-cubeinfotech.ddns.net
+    depends_on:
+      - mysql_db
+      - phpmyadmin
+
+  mysql_db:
+    container_name: mysql_container
+    environment:
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_DATABASE: wordpress_db_1
+      MYSQL_DATABASE: wordpress_db_2
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: wordpress_user
+      MYSQL_PASSWORD: wordpress
+    image: linuxserver/mariadb
+    restart: always
+    volumes:
+      - "/home/project/website/config/mariadb:/config"
+
+
+  wordpress-1:
+    container_name: wordpress_container_site1
+    depends_on:
+      - mysql_db
+    environment:
+      WORDPRESS_DB_HOST: "mysql_db:3306"
+      WORDPRESS_DB_NAME: wordpress_db
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress
+
+    image: "wordpress:latest"
+    ports:
+      - "8000:80"
+    restart: always
+    volumes:
+      - "/home/project/website/wordpress-1:/var/www/html/site1"
+
+
+  wordpress-2:
+    container_name: wordpress_container_site2
+    depends_on:
+      - mysql_db
+    environment:
+      WORDPRESS_DB_HOST: "mysql_db:3306"
+      WORDPRESS_DB_NAME: wordpress_db_2
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress
+    image: "wordpress:latest"
+    ports:
+      - "8001:80"
+    restart: always
+    volumes:
+      - "/home/project/website/wordpress-2:/var/www/html/site2"
+      
+      
+    wordpress-3:
+    container_name: wordpress_container_site3
+    depends_on:
+      - mysql_db
+    environment:
+      WORDPRESS_DB_HOST: "mysql_db:3306"
+      WORDPRESS_DB_NAME: wordpress_db_3
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress
+    image: "wordpress:latest"
+    ports:
+      - "8002:80"
+    restart: always
+    volumes:
+      - "/home/project/website/wordpress-3:/var/www/html/site3"    
+     
+
+  phpmyadmin:
+    container_name: phpmyadmin_container
+    depends_on:
+      - mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      PMA_HOST: mysql_db
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "3333:80"
+    restart: always
+    volumes:
+      - "/home/project/website/phpadmin:/var/www/html/phpmyadmin"
+
+volumes:
+  mysql: {}
